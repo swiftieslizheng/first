@@ -269,35 +269,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.speed_low:
                 Mp3Info mp3Info = mp3Infos.get(listPosition);
                 mediaPlayer.setPlaybackSpeed(0.8f);
-//
-//                try {
-//                    if (mediaPlayer.isPlaying() && lowPlaying) {
-//                        mediaPlayer.pause();
-//                        lowpause = true;
-//                    } else if (lowpause && mediaPlayer != null) {
-//                        mediaPlayer.start();
-//                        lowpause = false;
-//                    } else {
-////                        musicBinder.stop();
-////                        seekBar.setVisibility(View.GONE);
-////                        start_time.setVisibility(View.GONE);
-//                        mediaPlayer.reset();
-//                        mediaPlayer.setDataSource(mp3Info.getUrl());
-//                        mediaPlayer.prepare();
-//                        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                            @Override
-//                            public void onPrepared(MediaPlayer mp) {
-//                                mediaPlayer.setPlaybackSpeed(0.8f);
-//                                mediaPlayer.start();
-//                            }
-//                        });
-//                        lowPlaying = true;
-//                        highPlaying = false;
-//                    }
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
+
                 break;
             case R.id.speed_high:
                 mediaPlayer.setPlaybackSpeed(1.2f);
