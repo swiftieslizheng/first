@@ -1,25 +1,14 @@
 package com.lizheng.mymusic;
 
-import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 
 import android.media.MediaPlayer;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Message;
-import android.support.annotation.IntDef;
-import android.util.Log;
 
-import com.lizheng.mymusic.util.AppConstant;
-import com.lizheng.mymusic.util.SongsUtil;
-import java.io.IOException;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import io.vov.vitamio.LibsChecker;
 
 
 public class PlayerService extends Service {

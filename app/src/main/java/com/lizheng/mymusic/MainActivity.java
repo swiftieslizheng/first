@@ -1,12 +1,8 @@
 package com.lizheng.mymusic;
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -14,8 +10,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -25,18 +19,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lizheng.mymusic.adapter.MusicAdapter;
-import com.lizheng.mymusic.util.AppConstant;
 import com.lizheng.mymusic.util.SongsUtil;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.LogRecord;
 
 import io.vov.vitamio.LibsChecker;
 import io.vov.vitamio.MediaPlayer;
-import io.vov.vitamio.Vitamio;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
