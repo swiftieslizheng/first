@@ -2,17 +2,18 @@ package com.lizheng.mymusic;
 
 /**
  * Created by lizheng on 2017/12/5.
+ * 歌曲类，存放歌曲的所有信息
  */
 
 public class Mp3Info{
-    private long id;
-    private long album_id;
-    private String title;
-    private String artist;
-    private long duration;
-    private long size;
-    private String url;
-    private String album;
+    private long id; //歌曲id
+    private long album_id;//专辑id
+    private String title; //歌曲名称
+    private String artist; //歌手名称
+    private long duration; //歌曲时长
+    private long size; //歌曲大小
+    private String url;//歌曲地址
+    private String album;//专辑名称
     private int isMusic;
     private boolean isFavorite = false;
 

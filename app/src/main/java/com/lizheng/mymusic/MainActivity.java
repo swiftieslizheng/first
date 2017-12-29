@@ -34,42 +34,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ListView listView;
     private List<Mp3Info> mp3Infos;
     private MusicAdapter musicAdapter;
-    private Mp3Info mp3Info;
     private TextView tv_name;
     private int currentTime;    //当前歌曲播放时间
     private int duration;       //歌曲长度
     private boolean isPlaying;              // 正在播放
     private boolean isPause;                // 暂停
-//    private boolean lowpause;
-//    private boolean highpause;
-//    private boolean lowPlaying;
-//    private boolean highPlaying;
     private TextView tv_person;
     private TextView start_time;
     private TextView sum_time;
     private Button play_button;
     private Button previous_button;
     private Button next_button;
-    private Button speed_low;
-    private Button speed_high;
-    private Button speed_normal;
+    private Button speed_low;            //0.8的倍速
+    private Button speed_high;          //1.2的倍速
+    private Button speed_normal;       //正常倍速
     private int listPosition = 0;   //标识列表位置
     public final static int HANDER_UPDATE = 1;
-    private  SeekBar seekBar;
-    private Timer mTimer;
+    private  SeekBar seekBar;       //进度条
+    private Timer mTimer;          //计时器timer
     public  Handler handler;
-//            = new Handler(){
-//        @Override
-//        public void handleMessage(Message msg) {
-//            Bundle bundle =msg.getData();
-//            int total = bundle.getInt("total");
-//            int position = bundle.getInt("position");
-//            seekBar.setMax(total);
-//            seekBar.setProgress(position);
-//        }
-//    };
 
-
+/*
+*动态设置权限，安卓6。0开始把部分权限设置为更高级的权限，需要动态设置
+ */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -89,51 +76,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        if (!LibsChecker.checkVitamioLibs(this))
+        if (!LibsChecker.checkVitamioLibs(this))      //检查是否开始fffmeg解码
             return;
         setContentView(R.layout.activity_main);
-        ActionBar actionbar = getSupportActionBar();
+        ActionBar actionbar = getSupportActionBar();   //隐藏标题栏
         if (actionbar != null) {
             actionbar.hide();
         }
-        mediaPlayer = new MediaPlayer(this);
-        initfindViewById();
-//        handler = new Handler(){
-//        @Override
-//        public void handleMessage(Message msg) {
-//            Bundle bundle =msg.getData();
-//            long total = bundle.getLong("total");
-//            long position = bundle.getLong("position");
-//            seekBar.setMax((int)total);
-//            seekBar.setProgress((int)position);
-//            start_time.setText(SongsUtil.formatTime(position));
-//        }
-//    };
+        mediaPlayer = new MediaPlayer(this);        //new一个mediaplayer
+        initfindViewById();                         //把所有布局创建整合到这个方法里
+
         play_button.setOnClickListener(this);
         previous_button.setOnClickListener(this);
         next_button.setOnClickListener(this);
         speed_low.setOnClickListener(this);
         speed_high.setOnClickListener(this);
         speed_normal.setOnClickListener(this);
+       // 动态设置权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
         } else {
             mp3Infos = SongsUtil.getMp3Infos(this);
             musicAdapter = new MusicAdapter(this, mp3Infos);
-            //  Intent intent = new Intent(this, PlayerService.class);
-            //   bindService(intent, connection, BIND_AUTO_CREATE);
-            //   isBound= bindService(intent, connection, BIND_AUTO_CREATE);
             listView.setAdapter(musicAdapter);
             listView.setOnItemClickListener(new MyOnItemClickListener());
             mTimer = new Timer();
+            //每1000ms调用一次
             mTimer.schedule(mTimerTask,0,1000);
+            //设置进度条seekbar的监听
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if(isPlaying && fromUser){
-                        mediaPlayer.seekTo(progress);
-                        mediaPlayer.pause();
+                    if(isPlaying && fromUser){   //是否进行播放且是否是用户操作
+                        mediaPlayer.seekTo(progress);   //在指定位置播放
+                        mediaPlayer.pause();          //拖动时暂停播放
                     }
                 }
 
@@ -144,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    mediaPlayer.start();
+                    mediaPlayer.start();  //结束拖动时开始播放
                 }
             });
 
@@ -168,46 +145,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
-
+    //销毁操作
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        if (isBound) {
-//            unbindService(connection);// 解绑服务
-//            isBound = false;
-//        }
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
             mediaPlayer = null;
         }
     }
-
+    //按钮点击事件的监听
     @Override
     public void onClick(View v) {
-//        Intent intent = new Intent();
         switch (v.getId()) {
             case R.id.play:
                 if (isPlaying) {
-                    Mp3Info mp3Info = mp3Infos.get(listPosition);
-                    play_button.setBackgroundResource(R.drawable.play_selector);
-//                    intent.setClass(this, PlayerService.class);
-//                    intent.putExtra("url", mp3Info.getUrl());
-//                    intent.putExtra("MSG", AppConstant.PAUSE_MSG);
-//                    startService(intent);
-//                    musicBinder.pause();
-                    pause();
+                    Mp3Info mp3Info = mp3Infos.get(listPosition); //获取当前歌曲的位置
+                    play_button.setBackgroundResource(R.drawable.play_selector); //更改图标
+                    pause(); //暂停的方法（整合）
                     isPlaying = false;
                     isPause = true;
                 } else if (isPause) {
-                    Mp3Info mp3Info = mp3Infos.get(listPosition);
-                    play_button.setBackgroundResource(R.drawable.pause_selector);
-//                    intent.setClass(this, PlayerService.class);
-//                    intent.putExtra("url", mp3Info.getUrl());
-//                    intent.putExtra("MSG", AppConstant.CONTINUE_MSG);
-//                    startService(intent);
-                    //                   musicBinder.resume();
-                    resume();
+                    Mp3Info mp3Info = mp3Infos.get(listPosition);//获取当前歌曲的位置
+                    play_button.setBackgroundResource(R.drawable.pause_selector);//更改图标
+                    resume();//继续播放方法（整合）
                     isPlaying = true;
                     isPause = false;
                 }
@@ -215,61 +177,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.previous:
                 isPlaying = true;
                 isPause = false;
-                listPosition = listPosition - 1;
-                if (listPosition >= 0) {
+                listPosition = listPosition - 1; //获取上一首歌曲的位置
+                if (listPosition >= 0) { //如果存在
                     Mp3Info mp3Info = mp3Infos.get(listPosition);
                     tv_name.setText(mp3Info.getTitle());
                     tv_person.setText(mp3Info.getArtist());
                     sum_time.setText(SongsUtil.formatTime(mp3Info.getDuration()));
-//                    intent.setClass(this, PlayerService.class);
-//                    intent.putExtra("listPosition", listPosition);
-//                    intent.putExtra("url", mp3Info.getUrl());
-//                    intent.putExtra("MSG", AppConstant.PRIVIOUS_MSG);
-//                    startService(intent);
-//                    musicBinder.previous(mp3Info.getUrl());
-//                    seekBar.setVisibility(VISIBLE);
-//                    start_time.setVisibility(VISIBLE);
-                    previous(mp3Info.getUrl());
-                } else {
+                    previous(mp3Info.getUrl()); //上一首歌曲方法（整合）
+                } else {//如果不存在
                     Toast.makeText(this, "没有上一首了", Toast.LENGTH_SHORT).show();
-                    listPosition = listPosition +1;
+                    listPosition = listPosition +1;//返回当前歌曲位置
                 }
                 break;
             case R.id.next:
-                listPosition = listPosition + 1;
-                if (listPosition <= mp3Infos.size() - 1) {
+                listPosition = listPosition + 1;//获取下一首歌曲的位置
+                if (listPosition <= mp3Infos.size() - 1) {//如果存在
                     Mp3Info mp3Info = mp3Infos.get(listPosition);
                     tv_name.setText(mp3Info.getTitle());
                     tv_person.setText(mp3Info.getArtist());
                     sum_time.setText(SongsUtil.formatTime(mp3Info.getDuration()));
-//                    intent.setClass(this, PlayerService.class);
-//                    intent.putExtra("listPosition", listPosition);
-//                    intent.putExtra("url", mp3Info.getUrl());
-//                    intent.putExtra("MSG", AppConstant.NEXT_MSG);
-//                    startService(intent);
-//                    musicBinder.next(mp3Info.getUrl());
-//                    seekBar.setVisibility(VISIBLE);
-//                    start_time.setVisibility(VISIBLE);
-                    next(mp3Info.getUrl());
-                } else {
+                    next(mp3Info.getUrl());//下一首歌曲方法（整合）
+                } else {//如果不存在
                     Toast.makeText(this, "没有下一首了", Toast.LENGTH_SHORT).show();
-                    listPosition = listPosition -1;
+                    listPosition = listPosition -1;//返回当前歌曲位置
                 }
                 break;
             case R.id.speed_low:
-                Mp3Info mp3Info = mp3Infos.get(listPosition);
-                mediaPlayer.setPlaybackSpeed(0.8f);
+                Mp3Info mp3Info = mp3Infos.get(listPosition);//获取当前歌曲的位置
+                mediaPlayer.setPlaybackSpeed(0.8f);//调整为0。8倍速
 
                 break;
             case R.id.speed_high:
-                mediaPlayer.setPlaybackSpeed(1.2f);
+                mediaPlayer.setPlaybackSpeed(1.2f);//调整为1。2倍速
                 break;
             case R.id.speed_normal:
-                mediaPlayer.setPlaybackSpeed(1.0f);
+                mediaPlayer.setPlaybackSpeed(1.0f);//调整为1。0倍速
                 break;
         }
     }
 
+    //listview里item的监听
 
     class MyOnItemClickListener implements AdapterView.OnItemClickListener {
 
@@ -277,27 +224,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (mp3Infos != null) {
                 Mp3Info mp3Info = mp3Infos.get(position);
-                listPosition = position;
-//                Intent intent = new Intent();
-//                intent.putExtra("url", mp3Info.getUrl());
-//                intent.putExtra("MSG", AppConstant.PLAY_MSG);
-//                intent.setClass(MainActivity.this, PlayerService.class);
-//                startService(intent);
-//                musicBinder.play(0,mp3Info.getUrl());
-//                seekBar.setVisibility(VISIBLE);
-//                start_time.setVisibility(VISIBLE);
-//                mediaPlayer.stop();
-                play(position,mp3Info.getUrl());
+                listPosition = position;                            //获取当前歌曲的位置
+                play(position,mp3Info.getUrl());                  //播放方法（整合）
                 play_button.setBackgroundResource(R.drawable.pause_selector);
-                tv_name.setText(mp3Info.getTitle());
-                tv_person.setText(mp3Info.getArtist());
-                sum_time.setText(SongsUtil.formatTime(mp3Info.getDuration()));
+                tv_name.setText(mp3Info.getTitle());    //设置底部歌曲名称
+                tv_person.setText(mp3Info.getArtist());  //设置底部歌曲的歌手信息
+                sum_time.setText(SongsUtil.formatTime(mp3Info.getDuration()));//设置底部歌曲时长
                 isPlaying = true;
                 isPause = false;
             }
         }
     }
-
+//播放歌曲
     public void play(int position, String path) {
         try {
             mediaPlayer.reset();//把各项参数恢复到初始状态
@@ -309,21 +247,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
-
+    //暂停歌曲
     public void pause() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             isPause = true;
         }
     }
-
+    //继续播放歌曲
     public void resume() {
         if (isPause) {
             mediaPlayer.start();
             isPause = false;
         }
     }
-
+    //停止歌曲
     public void stop() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -350,44 +288,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         play(0, path);
     }
 
-//    public void seekBarProgress() {
-//        final long total = mediaPlayer.getDuration();
-//        final Timer timer = new Timer();
-//        final TimerTask task = new TimerTask() {
-//            @Override
-//            public void run() {
-//                long position = mediaPlayer.getCurrentPosition();
-//                Message ms = Message.obtain();
-//                Bundle bundle=new Bundle();
-//                bundle.putLong("total",total);
-//                Log.i("seekbar","歌曲总长度"+total);
-//                bundle.putLong("position",position);
-//                Log.i("seekbar","歌曲"+position);
-//                ms.setData(bundle);
-//                handler.sendMessage(ms);
-//            }
-//        };
-//        timer.schedule(task, 100, 200);
-//        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//            @Override
-//            public void onCompletion(MediaPlayer mp) {
-//                timer.cancel();
-//                task.cancel();
-//            }
-//        });
-//    }
+//计时器工具
 private TimerTask mTimerTask = new TimerTask() {
     @Override
     public void run() {
         if(mediaPlayer == null)
             return;
         if(mediaPlayer.isPlaying()) {
-            Message msg = Message.obtain();
+            Message msg = Message.obtain(); //发送消息
             msg.what = HANDER_UPDATE;
-            mHandler.sendMessage(msg);
+            mHandler.sendMessage(msg); //hanler接收消息
         }
     }
 };
+// handler处理message
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -397,11 +311,11 @@ private TimerTask mTimerTask = new TimerTask() {
             }
             switch (msg.what){
                 case HANDER_UPDATE:
-                    long position = mediaPlayer.getCurrentPosition();
-                    long total = mediaPlayer.getDuration();
-                    seekBar.setMax((int)total);
-            seekBar.setProgress((int)position);
-            start_time.setText(SongsUtil.formatTime(position));
+                    long position = mediaPlayer.getCurrentPosition(); //得到当前歌曲进度
+                    long total = mediaPlayer.getDuration(); //得到当前歌曲总长
+                    seekBar.setMax((int)total); //设置进度条的总长
+            seekBar.setProgress((int)position); //设置进度条的位置
+            start_time.setText(SongsUtil.formatTime(position));//设置实时歌曲时间
                     break;
                 default:
                     break;
@@ -410,6 +324,7 @@ private TimerTask mTimerTask = new TimerTask() {
 
         }
     };
+    //播放前调用重写的PreparedListener方法
     private class PreparedListener implements MediaPlayer.OnPreparedListener {
         private int positon;
         public PreparedListener(int position) {

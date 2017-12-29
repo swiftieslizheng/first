@@ -19,10 +19,10 @@ import java.util.List;
 public class SongsUtil {
 
     public  static List<Mp3Info> getMp3Infos(Context context) {
-        Cursor cursor = context.getContentResolver().query(
+        Cursor cursor = context.getContentResolver().query(      //创建一个内容接收器，接收MediaStore.Audio.Media的媒体文件（sd卡的媒体文件）
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null,
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        List<Mp3Info> mp3Infos = new ArrayList<Mp3Info>();
+        List<Mp3Info> mp3Infos = new ArrayList<Mp3Info>();       //创建一个list集合，用来存放mp3
         for (int i = 0; i < cursor.getCount(); i++) {
             Mp3Info mp3Info = new Mp3Info();                               //新建一个歌曲对象,将从cursor里读出的信息存放进去,直到取完cursor里面的内容为止.
             cursor.moveToNext();
